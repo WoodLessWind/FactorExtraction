@@ -4,23 +4,24 @@ namespace FactorExtraction
 {
     public partial class FactorExtraction : Form
     {
-        public string[,] bugFactorDataArray;
-        public string[,] bugFactorIntroduceDataArray;
-        public string[,] robotFactorDataArray;
-        public string[,] robotFactorIntroduceDataArray;
-        //public string[,] squidFactorDataArray;
-        //public string[,] squidFactorIntroduceDataArray;
+        public static String[] factorLabel=new String[5];
+        public static string[,] bugFactorDataArray;
+        public static string[,] bugFactorIntroduceDataArray;
+        public static string[,] robotFactorDataArray;
+        public static string[,] robotFactorIntroduceDataArray;
+        //public static string[,] squidFactorDataArray;
+        //public static string[,] squidFactorIntroduceDataArray;
         bool unloadFactor = true;
         int chooseMode;
         int conventionMax = 1;
-        int additionalMax = 3;
+        int additionalMax = 2;
         int hellMax = 1;
         public FactorExtraction()
         {
             InitializeComponent();
             //启动程序加载保存因子
             bugFactorDataArray=LoadData(bugFactorDataArray, "bugFactorDataArray");
-            bugFactorIntroduceDataArray=LoadData(bugFactorIntroduceDataArray, "bugFactorDataArray");
+            bugFactorIntroduceDataArray=LoadData(bugFactorIntroduceDataArray, "bugFactorIntroduceDataArray");
             robotFactorDataArray=LoadData(robotFactorDataArray, "robotFactorDataArray");
             robotFactorIntroduceDataArray=LoadData(robotFactorIntroduceDataArray, "robotFactorIntroduceDataArray");
             //squidFactorDataArray=LoadData(squidFactorDataArray,"squidFactorDataArray");
@@ -31,9 +32,9 @@ namespace FactorExtraction
         {
             ChooseModeBox.SelectedIndex = 2;
             ChooseEnemyBox.SelectedIndex = 0;
-            SetupDoubleClickTransfer(ConventionExtraction, ConventionSelect, conventionMax);
-            SetupDoubleClickTransfer(AdditionalExtraction, AdditionalSelect, additionalMax);
-            SetupDoubleClickTransfer(HellExtraction, HellSelect, hellMax);
+            SetupDoubleClickTransfer(ConventionExtraction, ConventionSelect, conventionMax,0);
+            SetupDoubleClickTransfer(AdditionalExtraction, AdditionalSelect,1);
+            SetupDoubleClickTransfer(HellExtraction, HellSelect, hellMax,2);
             SetupDoubleClickDelete(ConventionSelect);
             SetupDoubleClickDelete(AdditionalSelect);
             SetupDoubleClickDelete(HellSelect);
@@ -45,19 +46,18 @@ namespace FactorExtraction
                 MessageBox.Show($"请先载入因子", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            chooseMode = ChooseModeBox.SelectedIndex;
             switch (ChooseEnemyBox.SelectedIndex)
             {
                 case 0:
                     PopulateColumns(bugFactorDataArray, 3, 0);
                     PopulateColumns(bugFactorDataArray, 5, 1);
-                    if (chooseMode != 0)
+                    if (ChooseModeBox.SelectedIndex != 0)
                         PopulateColumns(bugFactorDataArray, 3, 2);
                     break;
                 case 1:
                     PopulateColumns(robotFactorDataArray, 3, 0);
                     PopulateColumns(robotFactorDataArray, 5, 1);
-                    if (chooseMode != 0)
+                    if (ChooseModeBox.SelectedIndex != 0)
                         PopulateColumns(robotFactorDataArray, 3, 2);
                     break;
                 case 2:
@@ -206,6 +206,7 @@ namespace FactorExtraction
                     MessageBox.Show($"错误：未选择敌人", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     break;
             }
+
         }
         private void ChooseModeBox_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -234,6 +235,24 @@ namespace FactorExtraction
                     MessageBox.Show($"错误：错误的模式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     break;
             }
+            // 确保线程安全
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => SelectReset_Click(SelectReset, EventArgs.Empty)));
+            }
+            else
+            {
+                SelectReset_Click(SelectReset, EventArgs.Empty); // 直接调用事件方法
+            }
+
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => DecideReset_Click(DecideReset, EventArgs.Empty)));
+            }
+            else
+            {
+                DecideReset_Click(DecideReset, EventArgs.Empty); // 直接调用事件方法
+            }
         }
         private void SelectReset_Click(object sender, EventArgs e)
         {
@@ -250,18 +269,7 @@ namespace FactorExtraction
         }
         private void ShowFactor_Click(object sender, EventArgs e)
         {
-            switch (ChooseModeBox.SelectedIndex)
-            {
-                case 0:
-                    if (ConventionSelect.Items.Count==1&& AdditionalSelect.Items.Count==2)
-                    {
-
-                    }
-                    break;
-                default:
-                    break;
-            }
-            SelectFactor.ShowOrOpen();
+            SelectFactorSetting();
         }
         private void FactorExtraction_FormClosing(object sender, FormClosingEventArgs e)
         {   //退出程序保存因子
@@ -275,8 +283,32 @@ namespace FactorExtraction
 
 
 
+        public static String UpdateFactorIntroductionLabel(String[,] factors, String[,] Intros,Label label)
+        {
+            string labelText = label.Text;
+            bool found = false;
+            // 遍历二维数组查找匹配项
+            for (int i = 0; i < factors.GetLength(0); i++)
+            {
+                for (int j = 0; j < factors.GetLength(1); j++)
+                {
+                    // 检查当前行的第一列（名字列）是否匹配
+                    if (factors[i, j]?.Equals(labelText, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        // 匹配成功，获取第二列（介绍列）的值
+                        found = true;
+                        return Intros[i, j]?.ToString() ?? "介绍为空"; ;
+                    }
+                }
+            }
 
-        public void UpdateFactorIntroductionLabel(ListBox listBox, String[,] factors, String[,] Intros)
+            if (!found)
+            {
+                return "未找到相关介绍";
+            }
+            return "";
+        }
+        private void UpdateFactorIntroductionLabel(ListBox listBox, String[,] factors, String[,] Intros)
         {
             if (listBox.SelectedIndex == -1)
             {
@@ -290,7 +322,6 @@ namespace FactorExtraction
                 // 遍历二维数组查找匹配项
                 for (int i = 0; i < factors.GetLength(0); i++)
                 {
-                    Console.WriteLine();
                     for (int j = 0; j < factors.GetLength(1); j++)
                     {
                         // 检查当前行的第一列（名字列）是否匹配
@@ -461,7 +492,7 @@ namespace FactorExtraction
                     break;
             }
         }
-        private void SetupDoubleClickTransfer(ListBox sourceListBox, ListBox targetListBox, int maxItems)
+        private void SetupDoubleClickTransfer(ListBox sourceListBox, ListBox targetListBox, int maxItems,int index)
         {
             // 订阅源ListBox的双击事件
             sourceListBox.MouseDoubleClick += (sender, e) =>
@@ -469,7 +500,6 @@ namespace FactorExtraction
                 // 验证是否左键双击
                 if (e.Button != MouseButtons.Left || e.Clicks != 2)
                     return;
-
                 // 获取选中的项目
                 if (sourceListBox.SelectedItem == null)
                     return;
@@ -487,19 +517,53 @@ namespace FactorExtraction
                         if (!targetListBox.Items[i].ToString().Contains(sourceListBox.SelectedItem.ToString()))
                         {
                             targetListBox.Items.RemoveAt(i);
+                            factorLabel[i] = null;
                             break;
                         }
                     }
                 }
                 // 添加到目标ListBox
                 targetListBox.Items.Add(sourceListBox.SelectedItem);
+                sendFactor(index, sourceListBox);
+            };
+        }
+        private void SetupDoubleClickTransfer(ListBox sourceListBox, ListBox targetListBox, int index)
+        {
+            // 订阅源ListBox的双击事件
+            sourceListBox.MouseDoubleClick += (sender, e) =>
+            {
+                // 验证是否左键双击
+                if (e.Button != MouseButtons.Left || e.Clicks != 2)
+                    return;
+                // 获取选中的项目
+                if (sourceListBox.SelectedItem == null)
+                    return;
+                // 检查是否已存在
+                if (targetListBox.Items.Contains(sourceListBox.SelectedItem.ToString()))
+                {
+                    return;
+                }
+                // 检查容量
+                if (targetListBox.Items.Count == additionalMax)
+                {
+                    // 可选：自动移除最旧的非重复项
+                    for (int i = 0; i < additionalMax; i++)
+                    {
+                        if (!targetListBox.Items[i].ToString().Contains(sourceListBox.SelectedItem.ToString()))
+                        {
+                            targetListBox.Items.RemoveAt(i);
+                            factorLabel[i] = null;
+                            break;
+                        }
+                    }
+                }
+                // 添加到目标ListBox
+                targetListBox.Items.Add(sourceListBox.SelectedItem);
+                sendFactor(index, sourceListBox);
             };
         }
         private void SetupDoubleClickDelete(ListBox sourceListBox)
         {
-            //ConventionSelect.SelectedIndexChanged -= ConventionSelect_SelectedIndexChanged;
-            //AdditionalSelect.SelectedIndexChanged -= AdditionalSelect_SelectedIndexChanged;
-            //HellSelect.SelectedIndexChanged -= HellSelect_SelectedIndexChanged;
             // 订阅源ListBox的双击事件
             sourceListBox.MouseDoubleClick += (sender, e) =>
             {
@@ -513,9 +577,6 @@ namespace FactorExtraction
                 // 添加到目标ListBox
 
                 sourceListBox.Items.Remove(sourceListBox.SelectedItem);
-                //ConventionSelect.SelectedIndexChanged += ConventionSelect_SelectedIndexChanged;
-                //AdditionalSelect.SelectedIndexChanged += AdditionalSelect_SelectedIndexChanged;
-                //HellSelect.SelectedIndexChanged += HellSelect_SelectedIndexChanged;
             };
         }
         private String[,]? LoadData(String[,] dataArray,String ArrayName)
@@ -532,8 +593,35 @@ namespace FactorExtraction
             }
             return dataArray;
         }
-
-
+        private void SelectFactorSetting()
+        {
+            SelectFactor.ShowOrOpen(ChooseModeBox.SelectedIndex);
+        }
+        private void sendFactor(int index,ListBox sourceListBox)
+        {
+            switch (index)
+            {
+                case 0:
+                    factorLabel[0] = sourceListBox.SelectedItem.ToString();
+                    break;
+                case 1:
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        // 检查当前元素是否为 null，并且确保 SelectedItem 不为 null
+                        if (factorLabel[i] == null && sourceListBox.SelectedItem != null)
+                        {
+                            factorLabel[i] = sourceListBox.SelectedItem.ToString();
+                            break; // 赋值后立即退出循环
+                        }
+                    }
+                    break;
+                case 2:
+                    factorLabel[4] = sourceListBox.SelectedItem.ToString();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     public class DataManager
     {
@@ -580,5 +668,4 @@ namespace FactorExtraction
             }
         }
     }
-
 }

@@ -142,9 +142,9 @@
             ConventionExtraction.Font = new Font("Microsoft YaHei UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 134);
             ConventionExtraction.FormattingEnabled = true;
             ConventionExtraction.ItemHeight = 30;
-            ConventionExtraction.Location = new Point(18, 111);
+            ConventionExtraction.Location = new Point(3, 111);
             ConventionExtraction.Name = "ConventionExtraction";
-            ConventionExtraction.Size = new Size(180, 184);
+            ConventionExtraction.Size = new Size(195, 184);
             ConventionExtraction.TabIndex = 10;
             ConventionExtraction.SelectedIndexChanged += ConventionExtraction_SelectedIndexChanged;
             // 
@@ -241,7 +241,7 @@
             HellExtraction.ItemHeight = 30;
             HellExtraction.Location = new Point(390, 111);
             HellExtraction.Name = "HellExtraction";
-            HellExtraction.Size = new Size(180, 184);
+            HellExtraction.Size = new Size(190, 184);
             HellExtraction.TabIndex = 12;
             HellExtraction.SelectedIndexChanged += HellExtraction_SelectedIndexChanged;
             // 
@@ -416,7 +416,6 @@
         private Label FactorIntroduction;
         private Label SelectLabel;
         private Label ConventionFactorLabelSelect;
-        private ListBox ConventionSelect;
         private Button SelectReset;
         private Button DecideReset;
         private ListBox HellSelect;
@@ -426,5 +425,6 @@
         private Button AddFactorToApp;
         private Button ShowFactor;
         private Label loadContex;
+        public ListBox ConventionSelect;
     }
 }
