@@ -30,22 +30,21 @@ namespace FactorExtraction
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            ChooseModeBox.SelectedIndex = 2;
-            ChooseEnemyBox.SelectedIndex = 0;
-            SetupDoubleClickTransfer(ConventionExtraction, ConventionSelect, conventionMax,0);
-            SetupDoubleClickTransfer(AdditionalExtraction, AdditionalSelect,1);
-            SetupDoubleClickTransfer(HellExtraction, HellSelect, hellMax,2);
-            SetupDoubleClickDelete(ConventionSelect);
-            SetupDoubleClickDelete(AdditionalSelect);
-            SetupDoubleClickDelete(HellSelect);
+            InitializeDefaultSelections();
+            SetupDoubleClickHandlers();
         }
         private void ExtractionButton_Click(object sender, EventArgs e)
         {
+            SelectResetFunction();
+            DecideResetFunction();
+            // 检查是否选择了敌人
             if (unloadFactor)
             {
+                // 显示提示信息
                 MessageBox.Show($"请先载入因子", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            // 检查是否选择了模式
             switch (ChooseEnemyBox.SelectedIndex)
             {
                 case 0:
@@ -72,7 +71,7 @@ namespace FactorExtraction
                     break;
             }
 
-
+            ResetFactorLabel();
         }
         private void AddFactorToApp_Click_1(object sender, EventArgs e)
         {
@@ -256,20 +255,17 @@ namespace FactorExtraction
         }
         private void SelectReset_Click(object sender, EventArgs e)
         {
-            ConventionExtraction.Items.Clear();
-            AdditionalExtraction.Items.Clear();
-            HellExtraction.Items.Clear();
-            FactorIntroduction.Text = null;
+            SelectResetFunction();
         }
         private void DecideReset_Click(object sender, EventArgs e)
         {
-            ConventionSelect.Items.Clear();
-            AdditionalSelect.Items.Clear();
-            HellSelect.Items.Clear();
+            DecideResetFunction();
         }
         private void ShowFactor_Click(object sender, EventArgs e)
         {
+
             SelectFactorSetting();
+
         }
         private void FactorExtraction_FormClosing(object sender, FormClosingEventArgs e)
         {   //退出程序保存因子
@@ -621,6 +617,55 @@ namespace FactorExtraction
                 default:
                     break;
             }
+        }
+        private void ResetFactorLabel()
+        {
+            for (int i = 0; i < factorLabel.Length; i++)
+            {
+                factorLabel[i] = null;
+            }
+        }
+        private void SelectResetFunction()
+        {
+            ConventionExtraction.Items.Clear();
+            AdditionalExtraction.Items.Clear();
+            HellExtraction.Items.Clear();
+            ConventionSelect.Items.Clear();
+            AdditionalSelect.Items.Clear();
+            HellSelect.Items.Clear();
+            ResetFactorLabel();
+
+        }
+        private void DecideResetFunction()
+        {
+            ConventionSelect.Items.Clear();
+            AdditionalSelect.Items.Clear();
+            HellSelect.Items.Clear();
+            ResetFactorLabel();
+        }
+        /// <summary>
+        /// 初始化默认选择项
+        /// </summary>
+        private void InitializeDefaultSelections()
+        {
+            ChooseModeBox.SelectedIndex = 2; // 默认选择模式
+            ChooseEnemyBox.SelectedIndex = 0; // 默认选择敌人
+        }
+
+        /// <summary>
+        /// 设置双击事件处理程序
+        /// </summary>
+        private void SetupDoubleClickHandlers()
+        {
+            // 配置双击转移操作
+            SetupDoubleClickTransfer(ConventionExtraction, ConventionSelect, conventionMax, 0);
+            SetupDoubleClickTransfer(AdditionalExtraction, AdditionalSelect, 1);
+            SetupDoubleClickTransfer(HellExtraction, HellSelect, hellMax, 2);
+
+            // 配置双击删除操作
+            SetupDoubleClickDelete(ConventionSelect);
+            SetupDoubleClickDelete(AdditionalSelect);
+            SetupDoubleClickDelete(HellSelect);
         }
     }
     public class DataManager

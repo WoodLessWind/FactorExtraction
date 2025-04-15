@@ -278,6 +278,7 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "因子总览";
+            FormClosing += SelectFactor_FormClosing;
             ConventionPanel.ResumeLayout(false);
             ConventionPanel.PerformLayout();
             AdditionalPanel.ResumeLayout(false);
